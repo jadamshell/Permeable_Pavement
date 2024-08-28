@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspection Schedule</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .image-section {
+            width: 50%;
+            background: url('https://i.imgur.com/MJAi6O9.png') no-repeat center center/cover;
+            position: relative;
+            z-index: 1;
+        }
+        .video-wrapper {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 450px;
+            height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+            border: 3px solid #A6A6A6;
+        }
+        .video-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .accordion-section {
+            width: 50%;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #fff;
+            border-radius: 10px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .description {
+            margin-bottom: 20px;
+        }
+        .accordion {
+            width: 100%;
+        }
+        .accordion-item {
+            margin-bottom: 1px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            border-radius: 5px;
+        }
+        .accordion-title {
+            font-size: 18px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #0033A0;
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            border: none;
+            text-align: left;
+            outline: none;
+            transition: background-color 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
+        .accordion-title:hover {
+            background-color: #002075;
+        }
+        .accordion-content {
+            display: none;
+            padding: 10px;
+            background-color: #F2F2F2;
+            overflow: hidden;
+            box-sizing: border-box;
+            border-radius: 0 0 5px 5px;
+        }
+       .sub-tab {
+            background-color: #E8E8E8;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+         .sub-tab:hover {
+            background-color: rgba(0, 51, 160, 0.7);
+            color: white;
+        }
+        .sub-tab-content {
+            display: none;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .sub-tab-content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+        }
+        .hotspot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(0, 51, 160, 0.5);
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+        .hotspot::after {
+            content: '';
+            display: block;
+            width: 10px;
+            height: 10px;
+            margin: 5px;
+            background-color: white;
+            border-radius: 50%;
+        }
+        .hotspot:hover .hotspot-name {
+            display: block;
+        }
+        .hotspot-name {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: none;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+        .image-gallery {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .image-gallery img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+        }
+        .sub-tab-content img {
+            float: left;
+            width: 150px;
+            height: auto;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+        .iframe-title {
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #0033A0;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: -20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            position: relative;
+        }
+        .iframe-container {
+            border: 2px solid #0033A0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            margin-top: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            height: 680px; /* Adjust this height to remove extra space */
+        }
+        .iframe-container iframe {
+            width: 167%;
+            height: 1100px;
+            transform: scale(0.6);
+            transform-origin: 0 0;
+            border: none;
+        }
+        .iframe-instructions {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .arrow {
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            display: inline-block;
+            padding: 3px;
+            transition: transform 0.2s;
+        }
+        .arrow.down {
+            transform: rotate(45deg);
+        }
+        .arrow.up {
+            transform: rotate(-135deg);
+        }
+        .tour-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 3;
+            transition: transform 0.2s ease;
+        }
+        .tour-button:hover {
+            transform: scale(1.1);
+        }
+        .tour-popup {
+            display: none;
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 4;
+            padding: 20px;
+        }
+        .tour-popup iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .close-popup {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #1E8AFF;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        .inspection-title {
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #0033A0;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 0px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .ag-theme-alpine {
+            height: 400px;
+            width: 100%;
+        }
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 51, 160, 0.8);
+            z-index: 5;
+            justify-content: center;
+            align-items: center;
+        }
+        .fullscreen-table {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            height: 80%;
+            overflow: auto;
+        }
+        .close-fullscreen {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #1E8AFF;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        .fullscreen-table-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+      /* Add these new styles for the tooltip */
+        .image-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip {
+            visibility: hidden;
+            width: 200px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .image-wrapper:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          
+            const acc = document.getElementsByClassName("accordion-title");
+            const accContents = document.getElementsByClassName("accordion-content");
+            for (let i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function () {
+                    for (let j = 0; j < accContents.length; j++) {
+                        if (accContents[j].style.display === "block" && acc[j] !== acc[i]) {
+                            accContents[j].style.display = "none";
+                            acc[j].querySelector(".arrow").classList.replace("up", "down");
+                        }
+                    }
+                    this.classList.toggle("active");
+                    const panel = this.nextElementSibling;
+                    if (panel.style.display === "block") {
+                        panel.style.display = "none";
+                        this.querySelector(".arrow").classList.replace("up", "down");
+                    } else {
+                        panel.style.display = "block";
+                        this.querySelector(".arrow").classList.replace("down", "up");
+                    }
+                });
+            }
+
+            const hotspots = document.querySelectorAll('.hotspot');
+            hotspots.forEach((hotspot, index) => {
+                hotspot.addEventListener('click', () => {
+                    acc[index].click();
+                });
+            });
+
+            const subTabs = document.querySelectorAll('.sub-tab');
+            subTabs.forEach((subTab) => {
+                subTab.addEventListener('click', function () {
+                    const subTabContent = this.nextElementSibling;
+                    if (subTabContent.style.display === "block") {
+                        subTabContent.style.display = "none";
+                    } else {
+                        subTabContent.style.display = "block";
+                    }
+                });
+            });
+
+            const tourButton = document.querySelector('.tour-button');
+            const tourPopup = document.querySelector('.tour-popup');
+            const closePopup = document.querySelector('.close-popup');
+
+            tourButton.addEventListener('click', () => {
+                tourPopup.style.display = 'block';
+            });
+
+            closePopup.addEventListener('click', () => {
+                tourPopup.style.display = 'none';
+            });
+
+          const fullscreenOverlays = document.querySelectorAll('.fullscreen-overlay');
+            const fullscreenButtons = document.querySelectorAll('.fullscreen-button');
+
+            fullscreenButtons.forEach((button, index) => {
+                button.addEventListener('click', () => {
+                    fullscreenOverlays[index].style.display = 'flex';
+                });
+            });
+
+            const closeFullscreenButtons = document.querySelectorAll('.close-fullscreen');
+
+            closeFullscreenButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const fullscreenOverlay = button.closest('.fullscreen-overlay');
+                    if (fullscreenOverlay) {
+                        fullscreenOverlay.style.display = 'none';
+                    }
+                });
+            });
+
+            const columnDefs1 = [
+                { headerName: "Activity", field: "activity", filter: true },
+                { headerName: "Frequency", field: "frequency", filter: true },
+                { headerName: "Time Period", field: "timePeriod", filter: true }
+            ];
+
+            const rowData1 = [
+                { activity: "Check pretreatment for proper flow/filtration. If applicable, assess the health of plantings and replant as necessary.", frequency: "At least twice after storm events > 0.5 inches within 30 minutes of the event, then biannually", timePeriod: "Within the first 6 months then during Spring / Fall" },
+                { activity: "Check that there is no ponding", frequency: "At least twice after storm events > 0.5 inches within 30 minutes of the event", timePeriod: "Within the first 6 months" },
+                { activity: "Check permeable parts of drainage area to make sure they are clean of debris and evidence of erosion", frequency: "Biannually", timePeriod: "All year long" },
+                { activity: "Check for accumulation of sediment and organic debris on the permeable pavement surface.", frequency: "Biannually", timePeriod: "All year long" },
+                { activity: "Check for damaged pavement", frequency: "Biannually", timePeriod: "All year long, especially after winter season" },
+                { activity: "Replace any joint fill material, if applicable", frequency: "Annually", timePeriod: "As needed" },
+                { activity: "Practice surface cleaning (vacuuming)", frequency: "Biannually", timePeriod: "Spring / Fall" },
+                { activity: "Perform surface infiltration test", frequency: "Biannually", timePeriod: "After practice cleaning" },
+                { activity: "Clean underdrain", frequency: "Biannually", timePeriod: "Spring / Fall" },
+                { activity: "After the long-term operation of the practice, some occasional and infrequent maintenance activities might be required, such as bigger repairs, partial rehabilitation, or redesign of key elements of the practice.", frequency: "As needed", timePeriod: "As needed" }
+            ];
+
+            const columnDefs2 = [
+                { headerName: "Design Parameter", field: "parameter", flex: 1 },
+                { headerName: "Guidance", field: "guidance", flex: 1 },
+                { headerName: "Rationale", field: "rationale", flex: 2 }
+            ];
+
+            const rowData2 = [
+                { parameter: "Optimal Pavement Types for Runoff Reduction", guidance: "All are excellent. PC, PA, PICP, and CGP filled with gravel are best.", rationale: "Research shows that all types of pavement types reduce runoff substantially. CGP and PG filled with sand have slightly higher runoff rates." },
+                { parameter: "Design Surface Infiltration Rate", guidance: "2.5 to 7.5 cm/h (1 to 3 in./h)", rationale: "Studies show that 90% of all study sites had at least 2.5 cm/h (1 in./h) surface infiltration rates, with 5 to 7.5 cm/h (2 to 3 in./h) being a median range for partially clogged permeable pavement." },
+                { parameter: "Design Base Exfiltration Rate", guidance: "0.025 to 2.5 cm/h (0.01 to 1 in./h) 0.25 cm/h (0.1 in./h) is default for loamy sand.", rationale: "Even in somewhat sandy soils, exfiltration rates from the base were impacted by compaction that occurred during construction. It is recommended that the ksat of the underlying soil be divided by 10 to provide an approximate exfiltration rate." },
+                { parameter: "Slope", guidance: "Flat ideal, or terraced", rationale: "Flat applications of permeable pavement will utilize all of its storage capacity. Systems installed on a slope can be terraced, or effectively, little detention basins filled with gravel." },
+                { parameter: "Underdrain Flow Rate", guidance: "Release water so that the design event is emptied in 2–7 day depending on regional weather patterns.", rationale: "Include underdrain IF infiltration is not sufficient to empty the site within the required time period. Allows a mimicking of predevelopment hydrology stream recharge post event. Mitigates peak flow." },
+                { parameter: "Optimal Pavement Types for Metal Removal", guidance: "All are excellent. CGP and PG filled with sand are easiest to maintain.", rationale: "It is easier for street sweepers to remove the schmützdecke (or clogged layer) from the top of the sand column associated with CGP and PG." },
+                { parameter: "Optimal Pavement Types for Nutrient Removal", guidance: "CGP and PG filled with sand.", rationale: "These pavements act as if they are low head, shallow depth sand filters. More research is needed to confirm this interim finding." },
+                { parameter: "Optimal Pavement Design for Thermal Load Mitigation", guidance: "Infiltration best. Multiday retention discharged through internal water storage next best.", rationale: "Any water that infiltrates will approach subsurface ground temperature. Retaining discharge water for sufficient periods allows the cooler deeper depths of pavement to act as a heat exchanger." },
+                { parameter: "Run-on Ratio", guidance: "1:1 Ideal, but 5:1 possible under certain conditions", rationale: "The more run-on, the more likely a pavement is to clog. Impermeable asphalt, shingled roofs, and landscapes are most likely to cause clogging, so their run-on ratio would be limited to 1-part run-on surface to 1-part permeable pavement. A clean concrete pavement, however, could have up to a 5:1 run-on ratio and still function." },
+                { parameter: "Seasonally High Water Table (SHWT)", guidance: "30 cm (1 ft), preferably 60 cm (2 ft) from the bottom of the pavement base", rationale: "SHWT closer to the base will (1) impede exfiltration from the pavement and (2) lead to pollutant leaching from the pavement." }
+            ];
+
+          const gridOptions1 = {
+                columnDefs: columnDefs1,
+                rowData: rowData1,
+                defaultColDef: {
+                    sortable: true,
+                    filter: true,
+                    flex: 1,
+                    resizable: true
+                }
+            };
+
+            const gridOptions2 = {
+                columnDefs: columnDefs2,
+                rowData: rowData2,
+                defaultColDef: {
+                    sortable: true,
+                    filter: true,
+                    resizable: true
+                }
+            };
+
+            const eGridDiv1 = document.querySelector('#myGrid');
+            new agGrid.Grid(eGridDiv1, gridOptions1);
+
+            const eGridDiv2 = document.querySelector('#myGrid2');
+            new agGrid.Grid(eGridDiv2, gridOptions2);
+
+            // Add this new code here
+            const gridDiv2Full = document.querySelector('#myGrid2Full');
+            new agGrid.Grid(gridDiv2Full, {
+                columnDefs: columnDefs2,
+                rowData: rowData2,
+                defaultColDef: {
+                    sortable: true,
+                    filter: true,
+                    resizable: true
+                }
+            });
+
+            const gridDiv1Full = document.querySelector('#myGridFull');
+            new agGrid.Grid(gridDiv1Full, {
+                columnDefs: columnDefs1,
+                rowData: rowData1,
+                defaultColDef: {
+                    sortable: true,
+                    filter: true,
+                    resizable: true
+                }
+            });
+        });
+      
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="image-section">
+            <img src="https://i.imgur.com/WQ4hpF7.png" alt="Tour Button" class="tour-button">
+            <div class="tour-popup">
+                <button class="close-popup">&times;</button>
+                <iframe width="100%" height="640" frameborder="0" allow="xr-spatial-tracking; gyroscope; accelerometer" allowfullscreen scrolling="no" src="https://glennscreekwatershed.org/share/collection/7JzPq?logo=-1&info=0&fs=1&vr=0&zoom=1&thumbs=1"></iframe>
+            </div>
+            <div class="hotspot" style="top: 20.1%; left: 14%;">
+                <div class="hotspot-name">Pavers</div>
+            </div>
+            <div class="hotspot" style="top: 30%; left: 30%;">
+                <div class="hotspot-name">Open-Graded Bedding Course</div>
+            </div>
+            <div class="hotspot" style="top: 34%; left: 19%;">
+                <div class="hotspot-name">Open-Graded Base Reservoir</div>
+            </div>
+            <div class="hotspot" style="top: 50%; left: 31%;">
+                <div class="hotspot-name">Open-Graded Subbase Reservoir</div>
+            </div>
+            <div class="hotspot" style="top: 49%; left: 78%;">
+                <div class="hotspot-name">Underdrain (As Required)</div>
+            </div>
+            <div class="hotspot" style="top: 73%; left: 64%;">
+                <div class="hotspot-name">Geotextile</div>
+            </div>
+            <div class="hotspot" style="top: 87%; left: 67%;">
+                <div class="hotspot-name">Soil Subgrade</div>
+            </div>
+            <div class="video-wrapper">
+                <video autoplay loop muted>
+                    <source src="https://i.imgur.com/AZ8lgM9.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+        <div class="accordion-section">
+            <div class="title">Permeable Pavement</div>
+            <div class="description">
+                As the name suggests, permeable pavement allows water to pass through rather than run off the surface. It typically consists of a gravel storage layer, with depths ranging from 10 to 45 cm (4 to 18 in.). However, it can be as deep as 120 cm (4 ft) when designed for extreme weather events. This gravel layer is covered by a permeable surface, such as permeable concrete, asphalt, or interlocking concrete pavers. Designers increasingly opt for large perforated pipes or modular crate systems instead of traditional gravel. These alternatives offer greater void space, allowing for a more compact bed design, which reduces the need for extensive excavation and materials. Depending on the underlying soil, an under-drainage system may be necessary in areas where complete infiltration isn't feasible. When an underdrain is used, it's recommended to implement an elevated or restricted outfall. Simple designs often include upturned elbows or drilled PVC caps on the underdrain, converting them into a slow-release mechanism.
+                <br><br>
+               All types of permeable pavement function similarly and typically force water flow to occur in a one-dimensional direction. Rainfall moves vertically through the permeable pavement (or travels a short horizontal distance in the case of pavers), partially filling the gravel storage layer below. This water is stored and later exfiltrates from the system. The water pathway—either through soil exfiltration or an underdrain—depends on rainfall intensity, volume, and soil permeability. If the design includes a storage volume, water accumulates until it reaches capacity. Once full, water will flow over the pavement surface or drain through a raised underdrain. Although permeable pavements exhibit high infiltration rates, intense rainfall can still generate runoff, particularly in concrete grid paver systems filled with sand. After the storm, the stored water gradually exfiltrates into the surrounding soils, with minor evaporation also occurring. Some permeable pavement designs can capture and infiltrate nearly 100% of rainfall events, including extreme events when engineered to meet this specification (Davis et al., 2022).
+            </div>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-title">Design Considerations and Calculations <span class="arrow down"></span></button>
+                    <div class="accordion-content">
+                        <p>Five types of permeable pavements are commonly used, Permeable Asphalt (PA), Permeable Concrete (PC), Permeable Interlocking Concrete Pavers (PICP), Concrete Grid Pavers (CGP), and Plastic Grid Pavers (PG). General structural design considerations are discussed for each of the pavements below.</p>
+                        <div class="image-gallery">
+                            <img src="https://i.imgur.com/VFtfm7Z.jpeg" alt="Permeable Asphalt">
+                            <img src="https://i.imgur.com/4T7YjEB.png" alt="Permeable Concrete">
+                            <img src="https://i.imgur.com/SNHLDSV.jpeg" alt="Permeable Interlocking Concrete Pavers">
+                            <img src="https://i.imgur.com/7SxeZid.jpeg" alt="Concrete Grid Pavers">
+                            <img src="https://i.imgur.com/NayWF9k.jpeg" alt="Plastic Grid Pavers">
+                        </div>
+                        <div class="sub-tab">Design Calculator</div>
+                        <div class="sub-tab-content">
+                            <div class="iframe-container">
+                                <iframe src="https://jadamshell.github.io/PP_CALC/" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        <div class="sub-tab">Optimizing Design</div>
+                        <div class="sub-tab-content">
+                            <div class="inspection-title">Permeable Pavement Design Guidance</div>
+                            <div class="ag-theme-alpine" id="myGrid2" style="height: 400px;"></div>
+                            <button class="fullscreen-button">Full Screen</button>
+                            <div class="fullscreen-overlay">
+                                <div class="fullscreen-table">
+                                    <button class="close-fullscreen">&times;</button>
+                                    <div class="fullscreen-table-title">Permeable Pavement Design Guidance</div>
+                                    <div id="myGrid2Full" class="ag-theme-alpine" style="height: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sub-tab">Permeable Asphalt (PA)</div>
+                        <div class="sub-tab-content">
+    <img src="https://i.imgur.com/u4UElBV.jpeg" alt="Permeable Asphalt">Permeable asphalt (PA) is composed of fine and coarse aggregate stones held together by a bituminous binder. The fine aggregate content is intentionally reduced to create a larger void space, typically ranging between 15–20%. The thickness of the asphalt layer is determined by the expected traffic load, generally varying from 7.5 to 18 cm (3 to 7 in.). Standards for permeable asphalt are provided by the <a href="https://www.asphaltpavement.org" target="_blank">National Asphalt Pavement Association</a>. Additionally, an underlying base course is required to enhance storage capacity and provide the necessary structural strength (Ferguson, 2005; Davis et al., 2022).
+</div>
+
+                        <div class="sub-tab">Permeable Concrete (PC)</div>
+                        <div class="sub-tab-content">
+    <img src="https://i.imgur.com/s427RF7.jpeg" alt="Permeable Concrete">
+Permeable concrete (PC) is composed of a mix of Portland cement, fly ash, washed gravel, and water. The water-to-cementitious material ratio typically ranges between 0.35 and 0.45. Fine, washed gravel, less than 1.3 cm (0.5 in.) in size (No. 8 or 89 stone), is incorporated into the mixture to increase the void space. Unlike traditional concrete, permeable concrete features a void content of 15–25%, allowing water to infiltrate the surface, percolate through the pavement, and often exfiltrate into the subsurface. An admixture is added to enhance bonding and strength. These pavements are usually poured at a thickness of 10–20 cm (4–8 in.) and often include a gravel base course for additional storage or infiltration. The compressive strength of permeable concrete can vary from 2.8 to 28 MPa (400 to 4000 psi). For updated PC standards, refer to the <a href="https://www.nrmca.org" target="_blank">National Ready-mix Concrete Association</a>. The absence of fines is a distinctive characteristic of permeable concrete (Davis et al., 2022).
+</div>
+
+                        <div class="sub-tab">Permeable Interlocking Concrete Pavers (PICP)</div>
+<div class="sub-tab-content">
+    <img src="https://i.imgur.com/LIADWLB.jpeg" alt="Permeable Interlocking Concrete Pavers (PICP)">
+    Permeable interlocking concrete pavements (PICP) come in a variety of shapes and sizes. When installed, the blocks form patterns that create openings, allowing rainfall to infiltrate. These openings, which typically constitute 5–20% of the surface area, are usually filled with pea gravel aggregate but can also be filled with topsoil and grass. According to ASTM C936 specifications, the pavers must be at least 6.0 cm (2.36 in.) thick with a compressive strength of 55 MPa (8,000 psi) or higher. A typical PICP installation includes the pavers and gravel fill, a 3.8 to 7.6 cm (1.5 to 3.0 in.) fine gravel bedding layer, and a gravel base course storage layer (ICPI, 2004). Bricks can also be used in place of concrete blocks; these bricks are designed with small tabs along their edges to ensure proper spacing during installation (Davis et al., 2022).
+</div>
+
+                        <div class="sub-tab">Concrete Grid Pavers (CGP)</div>
+<div class="sub-tab-content">
+    <img src="https://i.imgur.com/kbGBsdL.jpeg" alt="Concrete Grid Pavers (CGP)">
+    ASTM C 1319, the Standard Specification for Concrete Grid Paving Units (2021), outlines the properties and specifications for concrete grid pavers (CGP). Typically, CGP are 9.0 cm (3.5 in.) thick, with a maximum dimension of 60 × 60 cm (24 × 24 in.). The open area percentage ranges from 20% to 50%, with the void spaces filled with topsoil and grass, sand, or aggregate. The minimum average compressive strength for CGP is 35 MPa (5,000 psi). A standard installation involves placing the grid pavers with the selected fill media over 2.5 to 3.8 cm (1 to 1.5 in.) of bedding sand, followed by a gravel base course and a compacted soil subgrade (ICPI, 2004). Special attention is required in CGP applications due to their tendency to “rock” or settle unevenly (Davis et al., 2022).
+</div>
+
+                       <div class="sub-tab">Plastic Grid Pavers (PG) (Gravel and Grass Filled)</div>
+<div class="sub-tab-content">
+    <img src="https://i.imgur.com/HgdZbjv.jpeg" alt="Plastic Grid Pavers (PG) (Gravel and Grass Filled)">
+    Plastic grid (PG) pavers, also known as geocells, are composed of flexible plastic interlocking units designed to facilitate infiltration through large gaps filled with gravel or topsoil planted with turfgrass. To enhance infiltration and storage, a sand bedding layer and gravel base course are often included in the installation. The empty grids offer 90–98% open space, with the actual void space depending on the type of fill media used (Ferguson, 2005). Although there are no uniform standards for PG pavers, one product specification lists the typical load-bearing capacity of empty grids at approximately 13.8 MPa (2000 psi), which can increase to 38 MPa (5500 psi) when filled with various materials (Davis et al., 2022).
+</div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-title">Open-Graded Bedding Course <span class="arrow down"></span></button>
+                    <div class="accordion-content">
+                        <p>This permeable layer is typically 1 to 2 inches thick and provides a stable, level bed surface for the permeable surface layer. It consists of small, uniformly sized aggregate, often referred to as poorly graded aggregate (EPA, 2021).</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-title">Open-Graded Base Reservoir <span class="arrow down"></span></button>
+                    <div class="accordion-content">
+                        <p>This layer is positioned directly beneath the choker or bedding course and acts as a high-infiltration-rate transition layer between the bedding and subbase layers. It also provides additional storage and can offer some filtration. In certain cases, filter fabric may be needed at the base of this layer to minimize the migration of fines. Typically, this base reservoir is 3 to 4 inches thick and, depending on local design requirements, is composed of uniformly sized crushed stone (e.g., No. 57 stone) or bank run gravel. The aggregate used in this layer is usually of an intermediate size between bedding and subbase material, often ranging from ¾ to 3⁄16 of an inch in diameter (EPA, 2021).</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-title">Open-Graded Subbase Reservoir <span class="arrow down"></span></button>
+                    <div class="accordion-content">
+                        <p>The subbase layer, or reservoir, functions as the primary water storage and support layer. The stone used is uniformly graded, with sizes typically ranging from ¾ of an inch to 2½ inches in diameter. The thickness of the subbase layer varies based on project-specific factors such as water storage needs, traffic loads, subgrade soil conditions, and the requirement for frost heave protection. While this layer often has a minimum thickness of 4 inches, it can exceed 24 inches in some cases. In pedestrian or residential driveway applications, a subbase layer may not be necessary; instead, the base layer is made thicker to provide the necessary water storage and structural support (EPA, 2021).</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-title">Underdrain (As Required) <span class="arrow down"></span></button>
+                    <div class="accordion-content">
+                        <p>An underdrain aids in the removal of water from the base and subbase layers. This system typically consists of a perforated pipe connected to an outlet structure. The need for an underdrain depends on the characteristics of the in situ soil and the overall design objectives. The storage layer must be capable of draining within 2–3 days to ensure adequate storage capacity for the next storm event. If the soil's infiltration rate falls below minimal thresholds, an underdrain becomes necessary and may also be preferred for construction or maintenance purposes. In contrast, highly pervious sandy soils do not require an underdrain. Soil testing is crucial, with estimations of hydraulic conductivity based on infiltration tests or soil particle size providing the most reliable information. Percolation or similar tests may differ significantly from actual in situ values—by factors of 10 to 20—especially if compaction protocols are not properly followed during construction. For instance, compaction can reduce the infiltration rate of a sandy clay loam from 1.3 cm/h (0.5 in./h) to as low as 0.06 to 0.13 cm/h (0.025 to 0.05 in./h), an order of magnitude lower. Even soils with low permeability will experience some infiltration due to the extended time available between storm events and the increased water head during storage. Additionally, some evapotranspiration may occur during dry periods between events. Significant reductions in peak flows and discharge volumes have been observed with permeable pavements installed over clayey soils (Braswell et al., 2018; Fassman & Blackbourn, 2010; Davis et al., 2022).</p>
+                        <div class="iframe-title">Does your Permeable Pavement need an Underdrain?</div>
+                        <div class="iframe-container">
+                            <iframe src="https://jadamshell.github.io/ev/" allowfullscreen></iframe>
+                        </div>
+                        <div class="iframe-instructions">Type your address into the search bar to see if your site may need an underdrain.</div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-title">Geotextile (As Required) <span class="arrow down"></span></button>
+                    <div class="accordion-content">
+                        <p>A geotextile layer can be employed to separate the subbase from the subgrade, effectively preventing the migration of soil into the aggregate layers of the subbase or base (EPA, 2021).</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-title">Soil Subgrade <span class="arrow down"></span></button>
+                    <div class="accordion-content">
+                        <p>The subgrade layer of soil lies directly beneath the aggregate base or subbase. The infiltration capacity of the subgrade determines the extent to which water can move from the aggregate into the surrounding soils. It is important that construction staff avoid compacting the subgrade soil (EPA, 2021).</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-title">Maintenance <span class="arrow down"></span></button>
+                    <div class="accordion-content">
+                        <p>The primary maintenance concern for permeable pavements is clogging, which can significantly reduce infiltration rates. Fine particles that contribute to clogging may originate from vehicles, the atmosphere, or stormwater discharge from nearby land surfaces—the more frequent the source (e.g., vehicle traffic) or the larger the contributing area (e.g., drainage area), the quicker clogging will occur. While clogging tends to increase with age and usage, it typically does not result in complete impermeability (Davis et al., 2022).</p>
+                        <div class="image-gallery">
+                            <img src="https://i.imgur.com/MfQT7Z7.png" alt="Regenerative Air Street Sweeper">
+                            <img src="https://i.imgur.com/9ohLYa0.png" alt="Vacuum Truck">
+                            <img src="https://i.imgur.com/zvaOr8o.jpeg" alt="Pressure Washing Porous Asphalt">
+                            <img src="https://i.imgur.com/fFOO6PW.jpeg" alt="Concrete Grid Pavers">
+                        </div>
+                        <div class="sub-tab">Inspection Schedule and Checklist</div>
+                        <div class="sub-tab-content">
+                            <div class="inspection-title">Overview And Schedule Of General Maintenance Activities For Permeable Pavement</div>
+                            <div id="myGrid" class="ag-theme-alpine"></div>
+                            <button class="fullscreen-button">Full Screen</button>
+                            <div class="fullscreen-overlay">
+                                <div class="fullscreen-table">
+                                    <button class="close-fullscreen">&times;</button>
+                                    <div class="fullscreen-table-title">Overview And Schedule Of General Maintenance Activities For Permeable Pavement</div>
+                                    <div id="myGridFull" class="ag-theme-alpine"></div>
+                                </div>
+                            </div>
+                            <div class="inspection-title">Inspection Checklist</div>
+                            <iframe allowfullscreen="allowfullscreen" scrolling="no" class="fp-iframe" src="https://heyzine.com/flip-book/8370b35279.html" style="border: 1px solid lightgray; width: 100%; height: 400px;"></iframe>
+                        </div>
+                        <div class="sub-tab">Regenerative Air Street Sweeper</div>
+                        <div class="sub-tab-content">
+                            <img src="https://i.imgur.com/pHo7MXA.jpeg" alt="Regenerative Air Street Sweeper">
+                           Regenerative air street sweepers operate by using a blower to push air across the pavement surface, effectively dislodging debris, dust, and fine particles. The debris is then vacuumed up into a hopper for disposal. This type of sweeper is particularly effective for routine maintenance of permeable pavements as it helps prevent clogging by regularly removing surface sediments that can obstruct infiltration (Winston and Fassman-Beck, 2022).
+                        </div>
+                        <div class="sub-tab">Vacuum Truck</div>
+                        <div class="sub-tab-content">
+                            <img src="https://i.imgur.com/UidXMIJ.png" alt="Vacuum Truck">
+                           Vacuum trucks are used for both routine and restorative maintenance of permeable pavements. These vehicles apply strong suction to the pavement surface, effectively removing debris, sediment, and other clogging materials from the pores. When used properly, vacuum trucks can restore surface infiltration rates to near-original levels, making them a vital tool for maintaining permeable interlocking concrete pavements and other permeable surfaces (Winston and Fassman-Beck, 2022).
+                        </div>
+                        <div class="sub-tab">Pressure Washing (Porous Asphalt)</div>
+                        <div class="sub-tab-content">
+                            <img src="https://i.imgur.com/3pwFp9V.jpeg" alt="Pressure Washing (Porous Asphalt)">
+                           Pressure washing is often used for spot maintenance on permeable pavements. High-pressure water is applied to the pavement surface to dislodge clogging materials and restore infiltration capacity. However, while pressure washing can improve infiltration rates, it is generally not sufficient as a standalone restorative measure, particularly for severely clogged surfaces(Winston and Fassman-Beck, 2022).
+                        </div>
+                        <div class="sub-tab">Milling (Porous Asphalt)</div>
+                        <div class="sub-tab-content">
+                            <img src="https://i.imgur.com/OGcOxCY.jpeg" alt="Milling (Porous Asphalt)">
+                            Milling is a restorative maintenance technique where a portion of the pavement's surface is removed to restore permeability. This method is particularly effective when the clogging material has accumulated near the surface. The depth of milling required depends on the extent of clogging, but even shallow milling can significantly enhance the surface infiltration rate of permeable asphalt (Winston & Fassman-Beck, 2022).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gridDiv1 = document.querySelector('#myGridFull');
+            new agGrid.Grid(gridDiv1, {
+                columnDefs: [
+                    { headerName: "Activity", field: "activity", filter: true, resizable: true, sortable: true },
+                    { headerName: "Frequency", field: "frequency", filter: true, resizable: true, sortable: true },
+                    { headerName: "Time Period", field: "timePeriod", filter: true, resizable: true, sortable: true }
+                ],
+                rowData: [
+                    { activity: "Check pretreatment for proper flow/filtration. If applicable, assess the health of plantings and replant as necessary.", frequency: "At least twice after storm events > 0.5 inches within 30 minutes of the event, then biannually", timePeriod: "Within the first 6 months then during Spring / Fall" },
+                    { activity: "Check that there is no ponding", frequency: "At least twice after storm events > 0.5 inches within 30 minutes of the event", timePeriod: "Within the first 6 months" },
+                    { activity: "Check permeable parts of drainage area to make sure they are clean of debris and evidence of erosion", frequency: "Biannually", timePeriod: "All year long" },
+                    { activity: "Check for accumulation of sediment and organic debris on the permeable pavement surface.", frequency: "Biannually", timePeriod: "All year long" },
+                    { activity: "Check for damaged pavement", frequency: "Biannually", timePeriod: "All year long, especially after winter season" },
+                    { activity: "Replace any joint fill material, if applicable", frequency: "Annually", timePeriod: "As needed" },
+                    { activity: "Practice surface cleaning (vacuuming)", frequency: "Biannually", timePeriod: "Spring / Fall" },
+                    { activity: "Perform surface infiltration test", frequency: "Biannually", timePeriod: "After practice cleaning" },
+                    { activity: "Clean underdrain", frequency: "Biannually", timePeriod: "Spring / Fall" },
+                    { activity: "After the long-term operation of the practice, some occasional and infrequent maintenance activities might be required, such as bigger repairs, partial rehabilitation, or redesign of key elements of the practice.", frequency: "As needed", timePeriod: "As needed" }
+                ],
+                defaultColDef: {
+                    sortable: true,
+                    filter: true,
+                    resizable: true
+                }
+            });
+        });
+      
+    </script>
+</body>
+</html>
